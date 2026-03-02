@@ -1,7 +1,6 @@
 package com.example.demo;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,13 +24,8 @@ public class TodoController {
 
     @GetMapping({"", "/"})
     public String list(Model model) {
-        List<Map<String, Object>> todoList = List.of(
-            Map.of("id", 1, "title", "Learn Spring Boot", "status", "TODO"),
-            Map.of("id", 2, "title", "Create Controller", "status", "DOING"),
-            Map.of("id", 3, "title", "Build Thymeleaf View", "status", "DONE")
-        );
-
-        model.addAttribute("todoList", todoList);
+        List<Todo> todos = todoService.findAll();
+        model.addAttribute("todos", todos);
         return "todo/list";
     }
 
