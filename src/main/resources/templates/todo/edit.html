@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ToDo&#x7de8;&#x96c6;</title>
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-4">ToDo&#x7de8;&#x96c6;</h1>
+
+                    <form th:action="@{/todo/{id}/update(id=${todo.id})}" method="post">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">&#x30bf;&#x30a4;&#x30c8;&#x30eb;</label>
+                            <input id="title" name="title" type="text" class="form-control"
+                                   th:value="${todo.title}" placeholder="&#x30bf;&#x30a4;&#x30c8;&#x30eb;&#x3092;&#x5165;&#x529b;&#x3057;&#x3066;&#x304f;&#x3060;&#x3055;&#x3044;" required>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">&#x66f4;&#x65b0;&#x3059;&#x308b;</button>
+                            <a href="/todo" class="btn btn-outline-secondary">&#x623b;&#x308b;</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

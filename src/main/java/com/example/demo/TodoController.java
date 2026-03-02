@@ -36,6 +36,13 @@ public class TodoController {
         return "todo/form";
     }
 
+    @GetMapping("/{id}/edit")
+    public String edit(@PathVariable("id") Long id, Model model) {
+        Todo todo = todoService.findById(id);
+        model.addAttribute("todo", todo);
+        return "todo/edit";
+    }
+
     @PostMapping("/confirm")
     public String confirm(@RequestParam("title") String title, Model model) {
         model.addAttribute("title", title);
@@ -48,6 +55,32 @@ public class TodoController {
         todo.setTitle(title);
         todo.setCompleted(false);
         todoService.create(todo);
+        return "redirect:/todo";
+    }
+
+    @PostMapping("/{id}/update")
+    public String update(@PathVariable("id") Long id,
+                         @RequestParam("title") String title,
+                         RedirectAttributes redirectAttributes) {
+        Todo todo = todoService.findById(id);
+        if (todo == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "\u66f4\u65b0\u306b\u5931\u6557\u3057\u307e\u3057\u305f");
+            return "redirect:/todo";
+        }
+
+        todo.setTitle(title);
+        boolean updated = todoService.update(todo);
+        if (updated) {
+            redirectAttributes.addFlashAttribute("successMessage", "\u66f4\u65b0\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "\u66f4\u65b0\u306b\u5931\u6557\u3057\u307e\u3057\u305f");
+        }
+        return "redirect:/todo";
+    }
+
+    @PostMapping("/{id}/toggle")
+    public String toggle(@PathVariable("id") Long id) {
+        todoService.toggleCompleted(id);
         return "redirect:/todo";
     }
 
