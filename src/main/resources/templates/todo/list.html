@@ -17,6 +17,17 @@
         <a href="/todo/new" class="btn btn-primary">新規登録</a>
     </div>
 
+    <div id="flashMessages" class="mb-3">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}">ToDoを削除しました</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}">削除に失敗しました</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
     <div th:if="${#lists.isEmpty(todos)}" class="card shadow-sm border-0">
         <div class="card-body text-center py-5">
             <h2 class="h5 mb-3">ToDoがまだ登録されていません</h2>
@@ -33,6 +44,7 @@
                     <th scope="col" style="width: 80px;">ID</th>
                     <th scope="col">タイトル</th>
                     <th scope="col" style="width: 140px;">完了状態</th>
+                    <th scope="col" style="width: 120px;">操作</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -40,11 +52,27 @@
                     <td th:text="${todo.id}">1</td>
                     <td th:text="${todo.title}">サンプルToDo</td>
                     <td th:text="${todo.completed} ? '完了' : '未完了'">未完了</td>
+                    <td>
+                        <form th:action="@{/todo/{id}/delete(id=${todo.id})}" method="post" class="d-inline"
+                              onsubmit="return confirm('本当に削除しますか？');">
+                            <button type="submit" class="btn btn-danger btn-sm">削除</button>
+                        </form>
+                    </td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+<script>
+    setTimeout(function () {
+        document.querySelectorAll("#flashMessages .alert").forEach(function (alertEl) {
+            alertEl.classList.remove("show");
+            setTimeout(function () {
+                alertEl.remove();
+            }, 150);
+        });
+    }, 3000);
+</script>
 </body>
 </html>
