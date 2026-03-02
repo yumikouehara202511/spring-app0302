@@ -37,69 +37,69 @@ public class TodoController {
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(@PathVariable("id") Long id, Model model) {
+    public String editToConfirm(@PathVariable("id") Long id, Model model, RedirectAttributes redirectAttributes) {
         Todo todo = todoService.findById(id);
-        model.addAttribute("todo", todo);
-        return "todo/edit";
+        if (todo == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "対象データが見つかりません");
+            return "redirect:/todo";
+        }
+        bindTodoAttributes(model, todo);
+        model.addAttribute("editMode", true);
+        return "todo/confirm";
     }
 
     @PostMapping("/confirm")
     public String confirm(@RequestParam(value = "id", required = false) Long id,
-                          @RequestParam("name") String name,
+                          @RequestParam(value = "name", required = false) String name,
                           @RequestParam(value = "phone", required = false) String phone,
                           @RequestParam(value = "birthday", required = false) String birthday,
                           @RequestParam(value = "orderHistory", required = false) String orderHistory,
+                          @RequestParam(value = "monthlyVisits", required = false) String monthlyVisits,
                           @RequestParam(value = "amount", required = false) Integer amount,
                           @RequestParam(value = "companionCount", required = false) Integer companionCount,
                           @RequestParam(value = "companionMemo", required = false) String companionMemo,
                           @RequestParam(value = "visitDate", required = false) String visitDate,
                           @RequestParam(value = "notes", required = false) String notes,
+                          @RequestParam(value = "salesTrendData", required = false) String salesTrendData,
+                          @RequestParam(value = "visitCountTrendData", required = false) String visitCountTrendData,
+                          @RequestParam(value = "visitDateTrendData", required = false) String visitDateTrendData,
+                          @RequestParam(value = "bottleTrendData", required = false) String bottleTrendData,
                           Model model) {
-        bindCustomerAttributes(model, id, name, phone, birthday, orderHistory, amount, companionCount, companionMemo, visitDate, notes);
+        Todo todo = buildCustomerTodo(id, name, phone, birthday, orderHistory, monthlyVisits, amount,
+                companionCount, companionMemo, visitDate, notes, salesTrendData, visitCountTrendData,
+                visitDateTrendData, bottleTrendData);
+        bindTodoAttributes(model, todo);
         return "todo/confirm";
     }
 
     @PostMapping("/complete")
     public String complete(@RequestParam(value = "id", required = false) Long id,
-                           @RequestParam("name") String name,
+                           @RequestParam(value = "name", required = false) String name,
                            @RequestParam(value = "phone", required = false) String phone,
                            @RequestParam(value = "birthday", required = false) String birthday,
                            @RequestParam(value = "orderHistory", required = false) String orderHistory,
+                           @RequestParam(value = "monthlyVisits", required = false) String monthlyVisits,
                            @RequestParam(value = "amount", required = false) Integer amount,
                            @RequestParam(value = "companionCount", required = false) Integer companionCount,
                            @RequestParam(value = "companionMemo", required = false) String companionMemo,
                            @RequestParam(value = "visitDate", required = false) String visitDate,
                            @RequestParam(value = "notes", required = false) String notes,
+                           @RequestParam(value = "salesTrendData", required = false) String salesTrendData,
+                           @RequestParam(value = "visitCountTrendData", required = false) String visitCountTrendData,
+                           @RequestParam(value = "visitDateTrendData", required = false) String visitDateTrendData,
+                           @RequestParam(value = "bottleTrendData", required = false) String bottleTrendData,
                            RedirectAttributes redirectAttributes) {
-        Todo todo = buildCustomerTodo(id, name, phone, birthday, orderHistory, amount, companionCount, companionMemo, visitDate, notes);
-        todoService.create(todo);
-        redirectAttributes.addFlashAttribute("successMessage", "顧客情報を登録しました");
-        return "redirect:/todo";
-    }
+        Todo todo = buildCustomerTodo(id, name, phone, birthday, orderHistory, monthlyVisits, amount,
+                companionCount, companionMemo, visitDate, notes, salesTrendData, visitCountTrendData,
+                visitDateTrendData, bottleTrendData);
 
-    @PostMapping("/{id}/update")
-    public String update(@PathVariable("id") Long id,
-                         @RequestParam("title") String title,
-                         RedirectAttributes redirectAttributes) {
-        Todo todo = todoService.findById(id);
-        if (todo == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "更新に失敗しました");
-            return "redirect:/todo";
-        }
-
-        todo.setTitle(title);
-        boolean updated = todoService.update(todo);
-        if (updated) {
-            redirectAttributes.addFlashAttribute("successMessage", "更新が完了しました");
+        if (todo.getId() != null && todoService.findById(todo.getId()) != null) {
+            todoService.update(todo);
+            redirectAttributes.addFlashAttribute("successMessage", "顧客情報を更新しました");
         } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "更新に失敗しました");
+            todoService.create(todo);
+            redirectAttributes.addFlashAttribute("successMessage", "顧客情報を登録しました");
         }
-        return "redirect:/todo";
-    }
-
-    @PostMapping("/{id}/toggle")
-    public String toggle(@PathVariable("id") Long id) {
-        todoService.toggleCompleted(id);
         return "redirect:/todo";
     }
 
@@ -107,34 +107,29 @@ public class TodoController {
     public String delete(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         boolean deleted = todoService.deleteById(id);
         if (deleted) {
-            redirectAttributes.addFlashAttribute("successMessage", "ToDoを削除しました");
+            redirectAttributes.addFlashAttribute("successMessage", "顧客情報を削除しました");
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "削除に失敗しました");
         }
         return "redirect:/todo";
     }
 
-    private void bindCustomerAttributes(Model model,
-                                        Long id,
-                                        String name,
-                                        String phone,
-                                        String birthday,
-                                        String orderHistory,
-                                        Integer amount,
-                                        Integer companionCount,
-                                        String companionMemo,
-                                        String visitDate,
-                                        String notes) {
-        model.addAttribute("id", id);
-        model.addAttribute("name", name);
-        model.addAttribute("phone", phone);
-        model.addAttribute("birthday", birthday);
-        model.addAttribute("orderHistory", orderHistory);
-        model.addAttribute("amount", amount);
-        model.addAttribute("companionCount", companionCount);
-        model.addAttribute("companionMemo", companionMemo);
-        model.addAttribute("visitDate", visitDate);
-        model.addAttribute("notes", notes);
+    private void bindTodoAttributes(Model model, Todo todo) {
+        model.addAttribute("id", todo.getId());
+        model.addAttribute("name", todo.getName());
+        model.addAttribute("phone", todo.getPhone());
+        model.addAttribute("birthday", todo.getBirthday());
+        model.addAttribute("orderHistory", todo.getOrderHistory());
+        model.addAttribute("monthlyVisits", todo.getMonthlyVisits());
+        model.addAttribute("amount", todo.getAmount());
+        model.addAttribute("companionCount", todo.getCompanionCount());
+        model.addAttribute("companionMemo", todo.getCompanionMemo());
+        model.addAttribute("visitDate", todo.getVisitDate());
+        model.addAttribute("notes", todo.getNotes());
+        model.addAttribute("salesTrendData", todo.getSalesTrendData());
+        model.addAttribute("visitCountTrendData", todo.getVisitCountTrendData());
+        model.addAttribute("visitDateTrendData", todo.getVisitDateTrendData());
+        model.addAttribute("bottleTrendData", todo.getBottleTrendData());
     }
 
     private Todo buildCustomerTodo(Long id,
@@ -142,11 +137,16 @@ public class TodoController {
                                    String phone,
                                    String birthday,
                                    String orderHistory,
+                                   String monthlyVisits,
                                    Integer amount,
                                    Integer companionCount,
                                    String companionMemo,
                                    String visitDate,
-                                   String notes) {
+                                   String notes,
+                                   String salesTrendData,
+                                   String visitCountTrendData,
+                                   String visitDateTrendData,
+                                   String bottleTrendData) {
         Todo todo = new Todo();
         todo.setId(id);
         todo.setTitle(name);
@@ -154,11 +154,16 @@ public class TodoController {
         todo.setPhone(phone);
         todo.setBirthday(birthday);
         todo.setOrderHistory(orderHistory);
+        todo.setMonthlyVisits(monthlyVisits);
         todo.setAmount(amount);
         todo.setCompanionCount(companionCount);
         todo.setCompanionMemo(companionMemo);
         todo.setVisitDate(visitDate);
         todo.setNotes(notes);
+        todo.setSalesTrendData(salesTrendData);
+        todo.setVisitCountTrendData(visitCountTrendData);
+        todo.setVisitDateTrendData(visitDateTrendData);
+        todo.setBottleTrendData(bottleTrendData);
         todo.setCompleted(false);
         return todo;
     }

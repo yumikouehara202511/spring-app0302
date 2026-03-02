@@ -5,26 +5,80 @@
 <mapper namespace="com.example.demo.mapper.TodoMapper">
 
     <select id="findAll" resultType="com.example.demo.model.Todo">
-        SELECT id, title, completed
+        SELECT id,
+               title,
+               name,
+               phone,
+               birthday,
+               order_history,
+               monthly_visits,
+               amount,
+               companion_count,
+               companion_memo,
+               visit_date,
+               notes,
+               sales_trend_data,
+               visit_count_trend_data,
+               visit_date_trend_data,
+               bottle_trend_data,
+               completed
         FROM todos
         ORDER BY id
     </select>
 
     <select id="findById" parameterType="long" resultType="com.example.demo.model.Todo">
-        SELECT id, title, completed
+        SELECT id,
+               title,
+               name,
+               phone,
+               birthday,
+               order_history,
+               monthly_visits,
+               amount,
+               companion_count,
+               companion_memo,
+               visit_date,
+               notes,
+               sales_trend_data,
+               visit_count_trend_data,
+               visit_date_trend_data,
+               bottle_trend_data,
+               completed
         FROM todos
         WHERE id = #{id}
     </select>
 
     <insert id="insert" parameterType="com.example.demo.model.Todo"
             useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO todos (title, completed)
-        VALUES (#{title}, #{completed})
+        <choose>
+            <when test="id != null">
+                INSERT INTO todos (id, title, name, phone, birthday, order_history, monthly_visits, amount, companion_count, companion_memo, visit_date, notes, sales_trend_data, visit_count_trend_data, visit_date_trend_data, bottle_trend_data, completed)
+                VALUES (#{id}, #{title}, #{name}, #{phone}, #{birthday}, #{orderHistory}, #{monthlyVisits}, #{amount}, #{companionCount}, #{companionMemo}, #{visitDate}, #{notes}, #{salesTrendData}, #{visitCountTrendData}, #{visitDateTrendData}, #{bottleTrendData}, #{completed})
+            </when>
+            <otherwise>
+                INSERT INTO todos (title, name, phone, birthday, order_history, monthly_visits, amount, companion_count, companion_memo, visit_date, notes, sales_trend_data, visit_count_trend_data, visit_date_trend_data, bottle_trend_data, completed)
+                VALUES (#{title}, #{name}, #{phone}, #{birthday}, #{orderHistory}, #{monthlyVisits}, #{amount}, #{companionCount}, #{companionMemo}, #{visitDate}, #{notes}, #{salesTrendData}, #{visitCountTrendData}, #{visitDateTrendData}, #{bottleTrendData}, #{completed})
+            </otherwise>
+        </choose>
     </insert>
 
     <update id="update" parameterType="com.example.demo.model.Todo">
         UPDATE todos
         SET title = #{title},
+            name = #{name},
+            phone = #{phone},
+            birthday = #{birthday},
+            order_history = #{orderHistory},
+            monthly_visits = #{monthlyVisits},
+            amount = #{amount},
+            companion_count = #{companionCount},
+            companion_memo = #{companionMemo},
+            visit_date = #{visitDate},
+            notes = #{notes},
+            sales_trend_data = #{salesTrendData},
+            visit_count_trend_data = #{visitCountTrendData},
+            visit_date_trend_data = #{visitDateTrendData},
+            bottle_trend_data = #{bottleTrendData},
             completed = #{completed}
         WHERE id = #{id}
     </update>

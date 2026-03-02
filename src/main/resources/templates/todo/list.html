@@ -1,84 +1,132 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ToDo一覧</title>
+    <title>顧客一覧</title>
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
         crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background: #f4f6f9; }
+        .card { border: 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .search-wrap { position: relative; width: 320px; max-width: 100%; }
+        .search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6c757d; }
+        .search-input { padding-left: 34px; }
+        .user-cell { display: flex; align-items: center; gap: 10px; }
+        .avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 12px; font-weight: 700;
+        }
+        .avatar.blue { background: #0d6efd; }
+        .avatar.green { background: #198754; }
+        .avatar.orange { background: #fd7e14; }
+        .avatar.purple { background: #6f42c1; }
+        .avatar.red { background: #dc3545; }
+        .action-btn { width: 30px; height: 30px; padding: 0; }
+        .table thead th { white-space: nowrap; font-size: 12px; text-transform: uppercase; color: #6c757d; }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">ToDo一覧</h1>
-        <a href="/todo/new" class="btn btn-primary">新規登録</a>
-    </div>
-
-    <div id="flashMessages" class="mb-3">
+    <div class="mb-3">
         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <span th:text="${successMessage}">ToDoを削除しました</span>
+            <span th:text="${successMessage}">success</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span th:text="${errorMessage}">削除に失敗しました</span>
+            <span th:text="${errorMessage}">error</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
 
-    <div th:if="${#lists.isEmpty(todos)}" class="card shadow-sm border-0">
-        <div class="card-body text-center py-5">
-            <h2 class="h5 mb-3">ToDoがまだ登録されていません</h2>
-            <p class="text-muted mb-4">最初のタスクを作成して、やることを管理しましょう。</p>
-            <a href="/todo/new" class="btn btn-primary">新規作成</a>
-        </div>
-    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="toolbar">
+                <div class="search-wrap">
+                    <i class="bi bi-search"></i>
+                    <input id="idSearch" type="text" class="form-control search-input form-control-sm" placeholder="ID検索">
+                </div>
+                <a href="/todo/new" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg"></i>
+                    新規追加
+                </a>
+            </div>
 
-    <div th:unless="${#lists.isEmpty(todos)}" class="card shadow-sm">
-        <div class="card-body p-0">
-            <table class="table table-striped table-hover mb-0">
-                <thead class="table-dark">
-                <tr>
-                    <th scope="col" style="width: 80px;">ID</th>
-                    <th scope="col">タイトル</th>
-                    <th scope="col" style="width: 140px;">完了状態</th>
-                    <th scope="col" style="width: 240px;">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="todo : ${todos}">
-                    <td th:text="${todo.id}">1</td>
-                    <td th:text="${todo.title}"
-                        th:classappend="${todo.completed} ? ' text-decoration-line-through text-muted' : ''">サンプルToDo</td>
-                    <td th:text="${todo.completed} ? '完了' : '未完了'">未完了</td>
-                    <td>
-                        <form th:action="@{/todo/{id}/toggle(id=${todo.id})}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-secondary btn-sm"
-                                    th:text="${todo.completed} ? '未完了にする' : '完了にする'">完了にする</button>
-                        </form>
-                        <a th:href="@{/todo/{id}/edit(id=${todo.id})}" class="btn btn-outline-primary btn-sm">編集</a>
-                        <form th:action="@{/todo/{id}/delete(id=${todo.id})}" method="post" class="d-inline"
-                              onsubmit="return confirm('本当に削除しますか？');">
-                            <button type="submit" class="btn btn-danger btn-sm">削除</button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="customerTable">
+                    <thead>
+                    <tr>
+                        <th><input class="form-check-input" type="checkbox" aria-label="all"></th>
+                        <th>ID</th>
+                        <th>ユーザー</th>
+                        <th>電話番号</th>
+                        <th>ボトル</th>
+                        <th>来店順位</th>
+                        <th>前回来店日</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(todos)}">
+                        <td colspan="8" class="text-center text-muted py-4">データがありません</td>
+                    </tr>
+                    <tr th:each="todo, stat : ${todos}" th:attr="data-id=${todo.id}">
+                        <td><input class="form-check-input" type="checkbox"></td>
+                        <td th:text="${todo.id}">1</td>
+                        <td>
+                            <div class="user-cell">
+                                <span class="avatar"
+                                      th:classappend="${stat.index % 5 == 0 ? ' blue' : (stat.index % 5 == 1 ? ' green' : (stat.index % 5 == 2 ? ' orange' : (stat.index % 5 == 3 ? ' purple' : ' red')))}"
+                                      th:text="${todo.name != null and !#strings.isEmpty(todo.name) ? #strings.substring(todo.name, 0, 1) : 'G'}">G</span>
+                                <span th:text="${todo.name != null and !#strings.isEmpty(todo.name) ? todo.name : '未設定'}">山田 太郎</span>
+                            </div>
+                        </td>
+                        <td th:text="${todo.phone != null and !#strings.isEmpty(todo.phone) ? todo.phone : '-'}">090-1234-5678</td>
+                        <td th:text="${todo.orderHistory != null and !#strings.isEmpty(todo.orderHistory) ? todo.orderHistory : '-'}">キンミヤ</td>
+                        <td>
+                            <span class="badge text-bg-success" th:text="${stat.count + '位'}">1位</span>
+                        </td>
+                        <td th:text="${todo.visitDate != null and !#strings.isEmpty(todo.visitDate) ? todo.visitDate : '-'}">2026-03-02</td>
+                        <td>
+                            <a class="btn btn-outline-secondary btn-sm action-btn"
+                               th:href="@{/todo/{id}/edit(id=${todo.id})}" title="編集"><i class="bi bi-pencil"></i></a>
+                            <form th:action="@{/todo/{id}/delete(id=${todo.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('削除しますか？');">
+                                <button class="btn btn-outline-danger btn-sm action-btn" type="submit" title="削除"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <nav aria-label="ページネーション">
+                <ul class="pagination pagination-sm justify-content-end mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">前へ</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#">次へ</a></li>
+                </ul>
+            </nav>
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 <script>
-    setTimeout(function () {
-        document.querySelectorAll("#flashMessages .alert").forEach(function (alertEl) {
-            alertEl.classList.remove("show");
-            setTimeout(function () {
-                alertEl.remove();
-            }, 150);
+    document.getElementById("idSearch").addEventListener("input", function (e) {
+        var keyword = e.target.value.trim();
+        document.querySelectorAll("#customerTable tbody tr[data-id]").forEach(function (row) {
+            var id = row.getAttribute("data-id") || "";
+            row.style.display = (!keyword || id.indexOf(keyword) !== -1) ? "" : "none";
         });
-    }, 3000);
+    });
 </script>
 </body>
 </html>
