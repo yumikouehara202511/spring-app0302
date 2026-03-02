@@ -24,9 +24,7 @@
             box-shadow: 0 10px 30px rgba(80, 95, 125, 0.14);
             backdrop-filter: blur(6px);
         }
-        .profile {
-            padding: 20px;
-        }
+        .profile { padding: 20px; }
         .ring {
             width: 86px;
             height: 86px;
@@ -54,6 +52,29 @@
         }
         .grid-edit .full { grid-column: span 2; }
         .charts { padding: 20px; }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .summary-card {
+            background: #fff;
+            border: 1px solid #edf0f4;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .summary-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.2;
+        }
         .chart-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -65,30 +86,15 @@
             border-radius: 14px;
             padding: 12px;
         }
-        .chart-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            gap: 8px;
+        .chart-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            margin: 0 0 8px;
         }
-        .chart-title { font-size: 13px; font-weight: 700; color: #374151; margin: 0; }
-        .mode-group { display: flex; gap: 4px; }
-        .mode-btn {
-            border: 1px solid #dbe2ea;
-            background: #fff;
-            border-radius: 8px;
-            padding: 2px 8px;
-            font-size: 11px;
-            cursor: pointer;
-        }
-        .mode-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
         .chart-wrap { height: 220px; }
-        .editor { margin-top: 10px; font-size: 12px; }
-        .editor label { font-weight: 600; }
-        .editor input { font-size: 12px; }
         @media (max-width: 992px) {
-            .chart-grid { grid-template-columns: 1fr; }
+            .summary-grid, .chart-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -103,7 +109,7 @@
                              th:text="${name != null and !#strings.isEmpty(name) ? #strings.substring(name, 0, 1) : 'G'}">G</div>
                     </div>
                     <h1 class="h5 text-center mb-1">顧客登録フォーム</h1>
-                    <p class="text-center text-muted mb-3">売上・来店データサマリー（編集可）</p>
+                    <p class="text-center text-muted mb-3">入力値を変更するとグラフに反映されます</p>
 
                     <div class="grid-edit">
                         <div>
@@ -115,6 +121,33 @@
                             <input class="form-control form-control-sm" name="name" th:value="${name}">
                         </div>
                         <div>
+                            <label class="form-label form-label-sm">日付</label>
+                            <input class="form-control form-control-sm" id="recordDateInput" type="date">
+                        </div>
+                        <div>
+                            <label class="form-label form-label-sm">来店日</label>
+                            <input class="form-control form-control-sm" name="visitDate" id="visitDateInput" th:value="${visitDate}">
+                        </div>
+                        <div>
+                            <label class="form-label form-label-sm">金額</label>
+                            <input class="form-control form-control-sm" name="amount" id="amountInput" th:value="${amount}">
+                        </div>
+                        <div>
+                            <label class="form-label form-label-sm">来店回数カウント</label>
+                            <input class="form-control form-control-sm" name="monthlyVisits" id="monthlyVisitsInput" th:value="${monthlyVisits}" placeholder="例: 4">
+                        </div>
+                        <div class="full">
+                            <label class="form-label form-label-sm">ボトル</label>
+                            <select class="form-select form-select-sm" name="orderHistory" id="orderHistoryInput">
+                                <option value="">選択してください</option>
+                                <option value="キンミヤ" th:selected="${orderHistory == 'キンミヤ'}">キンミヤ</option>
+                                <option value="黒霧" th:selected="${orderHistory == '黒霧'}">黒霧</option>
+                                <option value="角" th:selected="${orderHistory == '角'}">角</option>
+                                <option value="知多" th:selected="${orderHistory == '知多'}">知多</option>
+                                <option value="アードベック" th:selected="${orderHistory == 'アードベック'}">アードベック</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="form-label form-label-sm">電話番号</label>
                             <input class="form-control form-control-sm" name="phone" th:value="${phone}">
                         </div>
@@ -123,26 +156,10 @@
                             <input class="form-control form-control-sm" name="birthday" th:value="${birthday}">
                         </div>
                         <div>
-                            <label class="form-label form-label-sm">来店日</label>
-                            <input class="form-control form-control-sm" name="visitDate" th:value="${visitDate}">
-                        </div>
-                        <div>
-                            <label class="form-label form-label-sm">売上</label>
-                            <input class="form-control form-control-sm" name="amount" id="amountInput" th:value="${amount}">
-                        </div>
-                        <div>
-                            <label class="form-label form-label-sm">月別来店数</label>
-                            <input class="form-control form-control-sm" name="monthlyVisits" id="monthlyVisitsInput" th:value="${monthlyVisits}">
-                        </div>
-                        <div>
                             <label class="form-label form-label-sm">同席者人数</label>
                             <input class="form-control form-control-sm" name="companionCount" th:value="${companionCount}">
                         </div>
-                        <div class="full">
-                            <label class="form-label form-label-sm">ボトル</label>
-                            <input class="form-control form-control-sm" name="orderHistory" id="orderHistoryInput" th:value="${orderHistory}">
-                        </div>
-                        <div class="full">
+                        <div>
                             <label class="form-label form-label-sm">同席者メモ</label>
                             <input class="form-control form-control-sm" name="companionMemo" th:value="${companionMemo}">
                         </div>
@@ -156,85 +173,33 @@
 
             <div class="col-lg-8">
                 <section class="panel charts">
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <div class="summary-label">今月の総売上</div>
+                            <div class="summary-value" id="monthlySalesTotal">0円</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">今月の来店回数</div>
+                            <div class="summary-value" id="monthlyVisitTotal">0回</div>
+                        </div>
+                    </div>
+
                     <div class="chart-grid">
                         <article class="chart-card">
-                            <div class="chart-head">
-                                <p class="chart-title">売上推移</p>
-                                <div class="mode-group" data-chart="sales">
-                                    <button type="button" class="mode-btn active" data-mode="year">年別</button>
-                                    <button type="button" class="mode-btn" data-mode="month">月別</button>
-                                    <button type="button" class="mode-btn" data-mode="day">日別</button>
-                                </div>
-                            </div>
+                            <p class="chart-title">売上推移</p>
                             <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
-                            <div class="editor">
-                                <label>年別データ(カンマ区切り)</label>
-                                <input id="sales-year" class="form-control form-control-sm mb-1">
-                                <label>月別データ(カンマ区切り)</label>
-                                <input id="sales-month" class="form-control form-control-sm mb-1">
-                                <label>日別データ(カンマ区切り)</label>
-                                <input id="sales-day" class="form-control form-control-sm">
-                            </div>
                         </article>
-
                         <article class="chart-card">
-                            <div class="chart-head">
-                                <p class="chart-title">来店数推移</p>
-                                <div class="mode-group" data-chart="visitCount">
-                                    <button type="button" class="mode-btn active" data-mode="year">年別</button>
-                                    <button type="button" class="mode-btn" data-mode="month">月別</button>
-                                    <button type="button" class="mode-btn" data-mode="day">日別</button>
-                                </div>
-                            </div>
+                            <p class="chart-title">来店数推移</p>
                             <div class="chart-wrap"><canvas id="visitCountChart"></canvas></div>
-                            <div class="editor">
-                                <label>年別データ(カンマ区切り)</label>
-                                <input id="visitCount-year" class="form-control form-control-sm mb-1">
-                                <label>月別データ(カンマ区切り)</label>
-                                <input id="visitCount-month" class="form-control form-control-sm mb-1">
-                                <label>日別データ(カンマ区切り)</label>
-                                <input id="visitCount-day" class="form-control form-control-sm">
-                            </div>
                         </article>
-
                         <article class="chart-card">
-                            <div class="chart-head">
-                                <p class="chart-title">来店日トレンド</p>
-                                <div class="mode-group" data-chart="visitDate">
-                                    <button type="button" class="mode-btn active" data-mode="year">年別</button>
-                                    <button type="button" class="mode-btn" data-mode="month">月別</button>
-                                    <button type="button" class="mode-btn" data-mode="day">日別</button>
-                                </div>
-                            </div>
+                            <p class="chart-title">来店日トレンド</p>
                             <div class="chart-wrap"><canvas id="visitDateChart"></canvas></div>
-                            <div class="editor">
-                                <label>年別データ(カンマ区切り)</label>
-                                <input id="visitDate-year" class="form-control form-control-sm mb-1">
-                                <label>月別データ(カンマ区切り)</label>
-                                <input id="visitDate-month" class="form-control form-control-sm mb-1">
-                                <label>日別データ(カンマ区切り)</label>
-                                <input id="visitDate-day" class="form-control form-control-sm">
-                            </div>
                         </article>
-
                         <article class="chart-card">
-                            <div class="chart-head">
-                                <p class="chart-title">ボトル注文傾向</p>
-                                <div class="mode-group" data-chart="bottle">
-                                    <button type="button" class="mode-btn active" data-mode="year">年別</button>
-                                    <button type="button" class="mode-btn" data-mode="month">月別</button>
-                                    <button type="button" class="mode-btn" data-mode="day">日別</button>
-                                </div>
-                            </div>
+                            <p class="chart-title">ボトル注文傾向</p>
                             <div class="chart-wrap"><canvas id="bottleChart"></canvas></div>
-                            <div class="editor">
-                                <label>年別(キンミヤ,黒霧,角,知多,アードベック)</label>
-                                <input id="bottle-year" class="form-control form-control-sm mb-1">
-                                <label>月別(キンミヤ,黒霧,角,知多,アードベック)</label>
-                                <input id="bottle-month" class="form-control form-control-sm mb-1">
-                                <label>日別(キンミヤ,黒霧,角,知多,アードベック)</label>
-                                <input id="bottle-day" class="form-control form-control-sm">
-                            </div>
                         </article>
                     </div>
                 </section>
@@ -255,22 +220,25 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script th:inline="javascript">
-    const amountRaw = Number(/*[[${amount}]]*/ 0) || 0;
-    const monthlyVisitsRaw = /*[[${monthlyVisits}]]*/ "";
-    const salesRaw = /*[[${salesTrendData}]]*/ "";
-    const visitCountRaw = /*[[${visitCountTrendData}]]*/ "";
-    const visitDateRaw = /*[[${visitDateTrendData}]]*/ "";
-    const bottleRaw = /*[[${bottleTrendData}]]*/ "";
+    const initialAmount = Number(/*[[${amount}]]*/ 0) || 0;
+    const initialVisitText = /*[[${monthlyVisits}]]*/ "";
+    const initialVisitDate = /*[[${visitDate}]]*/ "";
+    const initialBottle = /*[[${orderHistory}]]*/ "";
+    const initialSalesJson = /*[[${salesTrendData}]]*/ "";
+    const initialVisitCountJson = /*[[${visitCountTrendData}]]*/ "";
+    const initialVisitDateJson = /*[[${visitDateTrendData}]]*/ "";
+    const initialBottleJson = /*[[${bottleTrendData}]]*/ "";
 
-    function parseCsv(csv) {
-        return (csv || "")
-            .split(",")
-            .map(v => Number(v.trim()))
-            .filter(v => !isNaN(v));
+    const bottleNames = ["キンミヤ", "黒霧", "角", "知多", "アードベック"];
+
+    function parseNumberFromText(value) {
+        const n = Number(String(value || "").replace(/[^\d]/g, ""));
+        return isNaN(n) ? 0 : n;
     }
 
-    function toCsv(values) {
-        return (values || []).join(",");
+    function parseVisitCount(value) {
+        const match = String(value || "").match(/(\d+)/);
+        return match ? Number(match[1]) : 0;
     }
 
     function parseJson(raw, fallback) {
@@ -278,160 +246,186 @@
         try { return JSON.parse(raw); } catch (e) { return fallback; }
     }
 
-    const visitMatch = (monthlyVisitsRaw || "").match(/(\d+)/);
-    const visitBase = visitMatch ? Number(visitMatch[1]) : 4;
-    const salesBase = amountRaw > 0 ? amountRaw : 12000;
+    function toDateString(inputDate) {
+        if (!inputDate) return "";
+        const d = new Date(inputDate + "T00:00:00");
+        if (isNaN(d.getTime())) return "";
+        return inputDate;
+    }
+
+    const amountInput = document.getElementById("amountInput");
+    const monthlyVisitsInput = document.getElementById("monthlyVisitsInput");
+    const visitDateInput = document.getElementById("visitDateInput");
+    const recordDateInput = document.getElementById("recordDateInput");
+    const bottleInput = document.getElementById("orderHistoryInput");
+
+    recordDateInput.value = toDateString(initialVisitDate) || toDateString(new Date().toISOString().slice(0, 10));
+
+    const fallbackLabels = ["1月", "2月", "3月", "4月", "5月", "6月"];
+    const fallbackSales = [8000, 9200, 9800, 10600, 11300, 12100];
+    const fallbackVisits = [2, 3, 3, 4, 5, 6];
+    const fallbackVisitDate = [60, 66, 70, 74, 79, 83];
+    const fallbackBottle = [8, 6, 5, 3, 2];
+
+    const savedSales = parseJson(initialSalesJson, null);
+    const savedVisitCount = parseJson(initialVisitCountJson, null);
+    const savedVisitDate = parseJson(initialVisitDateJson, null);
+    const savedBottle = parseJson(initialBottleJson, null);
+
+    function normalizeSeries(saved, fallbackValues) {
+        if (saved && Array.isArray(saved.values) && Array.isArray(saved.labels)) {
+            return { labels: saved.labels.slice(), values: saved.values.slice() };
+        }
+        if (saved && Array.isArray(saved.month)) {
+            return { labels: fallbackLabels.slice(0, saved.month.length), values: saved.month.slice() };
+        }
+        return { labels: fallbackLabels.slice(), values: fallbackValues.slice() };
+    }
 
     const state = {
-        sales: parseJson(salesRaw, {
-            year: [Math.round(salesBase * 0.65), Math.round(salesBase * 0.8), Math.round(salesBase * 0.95), salesBase],
-            month: [Math.round(salesBase * 0.55), Math.round(salesBase * 0.63), Math.round(salesBase * 0.78), Math.round(salesBase * 0.9), salesBase, Math.round(salesBase * 0.86)],
-            day: [Math.round(salesBase * 0.15), Math.round(salesBase * 0.18), Math.round(salesBase * 0.2), Math.round(salesBase * 0.22), Math.round(salesBase * 0.19), Math.round(salesBase * 0.24), Math.round(salesBase * 0.26)]
-        }),
-        visitCount: parseJson(visitCountRaw, {
-            year: [12, 18, 26, 32],
-            month: [Math.max(1, visitBase - 2), Math.max(1, visitBase - 1), visitBase, visitBase + 1, visitBase + 1, visitBase + 2],
-            day: [1, 0, 2, 1, 3, 2, 1]
-        }),
-        visitDate: parseJson(visitDateRaw, {
-            year: [65, 72, 81, 93],
-            month: [58, 60, 63, 67, 72, 76, 80, 85, 78, 88, 91, 95],
-            day: [80, 75, 82, 86, 78, 91, 88]
-        }),
-        bottle: parseJson(bottleRaw, {
-            year: [20, 16, 12, 9, 7],
-            month: [8, 6, 5, 4, 3],
-            day: [2, 1, 1, 1, 0]
-        }),
-        mode: { sales: "year", visitCount: "year", visitDate: "year", bottle: "year" }
-    };
-
-    const labels = {
-        sales: {
-            year: ["2023", "2024", "2025", "2026"],
-            month: ["1月", "2月", "3月", "4月", "5月", "6月"],
-            day: ["月", "火", "水", "木", "金", "土", "日"]
-        },
-        visitCount: {
-            year: ["2023", "2024", "2025", "2026"],
-            month: ["1月", "2月", "3月", "4月", "5月", "6月"],
-            day: ["月", "火", "水", "木", "金", "土", "日"]
-        },
-        visitDate: {
-            year: ["2023", "2024", "2025", "2026"],
-            month: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
-            day: ["月", "火", "水", "木", "金", "土", "日"]
-        },
-        bottle: {
-            year: ["キンミヤ", "黒霧", "角", "知多", "アードベック"],
-            month: ["キンミヤ", "黒霧", "角", "知多", "アードベック"],
-            day: ["キンミヤ", "黒霧", "角", "知多", "アードベック"]
-        }
-    };
-
-    const chartDefs = {
-        sales: { el: "salesChart", type: "bar", color: "#7c3aed" },
-        visitCount: { el: "visitCountChart", type: "line", color: "#e11d48" },
-        visitDate: { el: "visitDateChart", type: "line", color: "#2563eb" },
-        bottle: { el: "bottleChart", type: "doughnut", color: "#06b6d4" }
+        sales: normalizeSeries(savedSales, fallbackSales),
+        visitCount: normalizeSeries(savedVisitCount, fallbackVisits),
+        visitDate: normalizeSeries(savedVisitDate, fallbackVisitDate),
+        bottle: (savedBottle && Array.isArray(savedBottle.month)) ? savedBottle.month.slice() : fallbackBottle.slice()
     };
 
     const charts = {};
+    let lastSignature = "";
 
-    function buildDataset(key, mode) {
-        const data = state[key][mode];
-        if (key === "bottle") {
-            return [{
-                data: data,
-                backgroundColor: ["#4f46e5", "#22c55e", "#f59e0b", "#ef4444", "#a855f7"]
-            }];
+    function pushCapped(series, label, value) {
+        series.labels.push(label);
+        series.values.push(value);
+        if (series.labels.length > 20) {
+            series.labels.shift();
+            series.values.shift();
         }
-        if (chartDefs[key].type === "line") {
-            return [{
-                data: data,
-                borderColor: chartDefs[key].color,
-                backgroundColor: "rgba(99,102,241,0.2)",
+    }
+
+    function dateLabelForSeries() {
+        const base = recordDateInput.value || visitDateInput.value || new Date().toISOString().slice(0, 10);
+        const d = new Date(base + "T00:00:00");
+        if (isNaN(d.getTime())) return "不明";
+        return (d.getMonth() + 1) + "/" + d.getDate();
+    }
+
+    function appendFromInputs() {
+        const amount = parseNumberFromText(amountInput.value) || initialAmount || 0;
+        const visitCount = parseVisitCount(monthlyVisitsInput.value) || parseVisitCount(initialVisitText) || 0;
+        const selectedBottle = bottleInput.value || initialBottle;
+        const label = dateLabelForSeries();
+        const visitScore = Math.max(45, Math.min(100, 55 + visitCount * 6));
+
+        const signature = [label, amount, visitCount, selectedBottle].join("|");
+        if (signature === lastSignature) return;
+        lastSignature = signature;
+
+        if (amount > 0) pushCapped(state.sales, label, amount);
+        if (visitCount > 0) {
+            pushCapped(state.visitCount, label, visitCount);
+            pushCapped(state.visitDate, label, visitScore);
+        }
+
+        const idx = bottleNames.indexOf(selectedBottle);
+        if (idx >= 0) state.bottle[idx] = (state.bottle[idx] || 0) + 1;
+    }
+
+    function renderCharts() {
+        const salesData = {
+            labels: state.sales.labels,
+            datasets: [{
+                label: "売上",
+                data: state.sales.values,
+                backgroundColor: "#7c3aed",
+                borderRadius: 6
+            }]
+        };
+
+        const visitsData = {
+            labels: state.visitCount.labels,
+            datasets: [{
+                label: "来店回数",
+                data: state.visitCount.values,
+                borderColor: "#e11d48",
+                backgroundColor: "rgba(225, 29, 72, 0.18)",
                 fill: true,
                 tension: 0.3
-            }];
-        }
-        return [{
-            data: data,
-            backgroundColor: chartDefs[key].color,
-            borderRadius: 6
-        }];
-    }
-
-    function renderChart(key) {
-        const mode = state.mode[key];
-        const cfg = chartDefs[key];
-        const ctx = document.getElementById(cfg.el);
-        const data = {
-            labels: labels[key][mode],
-            datasets: buildDataset(key, mode)
+            }]
         };
-        if (charts[key]) {
-            charts[key].data = data;
-            charts[key].update();
-            return;
-        }
-        charts[key] = new Chart(ctx, {
-            type: cfg.type,
-            data: data,
-            options: { plugins: { legend: { display: key === "bottle" } } }
-        });
-    }
 
-    function setEditorValues() {
-        ["sales", "visitCount", "visitDate", "bottle"].forEach(function (key) {
-            document.getElementById(key + "-year").value = toCsv(state[key].year);
-            document.getElementById(key + "-month").value = toCsv(state[key].month);
-            document.getElementById(key + "-day").value = toCsv(state[key].day);
-        });
-    }
+        const visitDateData = {
+            labels: state.visitDate.labels,
+            datasets: [{
+                label: "来店日スコア",
+                data: state.visitDate.values,
+                borderColor: "#2563eb",
+                backgroundColor: "rgba(37, 99, 235, 0.15)",
+                fill: true,
+                tension: 0.25
+            }]
+        };
 
-    function bindEditors() {
-        ["sales", "visitCount", "visitDate", "bottle"].forEach(function (key) {
-            ["year", "month", "day"].forEach(function (mode) {
-                const el = document.getElementById(key + "-" + mode);
-                el.addEventListener("input", function () {
-                    state[key][mode] = parseCsv(el.value);
-                    if (state.mode[key] === mode) renderChart(key);
-                });
+        const bottleData = {
+            labels: bottleNames,
+            datasets: [{
+                data: state.bottle,
+                backgroundColor: ["#4f46e5", "#22c55e", "#f59e0b", "#ef4444", "#a855f7"]
+            }]
+        };
+
+        function upsertChart(key, elementId, type, data, showLegend) {
+            if (charts[key]) {
+                charts[key].data = data;
+                charts[key].update();
+                return;
+            }
+            charts[key] = new Chart(document.getElementById(elementId), {
+                type: type,
+                data: data,
+                options: { plugins: { legend: { display: showLegend } } }
             });
-        });
+        }
+
+        upsertChart("sales", "salesChart", "bar", salesData, false);
+        upsertChart("visitCount", "visitCountChart", "line", visitsData, false);
+        upsertChart("visitDate", "visitDateChart", "line", visitDateData, false);
+        upsertChart("bottle", "bottleChart", "doughnut", bottleData, true);
     }
 
-    document.querySelectorAll(".mode-group .mode-btn").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-            const group = btn.closest(".mode-group");
-            const key = group.getAttribute("data-chart");
-            state.mode[key] = btn.getAttribute("data-mode");
-            group.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            renderChart(key);
-        });
-    });
+    function updateSummary() {
+        const salesTotal = state.sales.values.reduce((a, b) => a + b, 0);
+        const visitsTotal = state.visitCount.values.reduce((a, b) => a + b, 0);
+        document.getElementById("monthlySalesTotal").textContent = salesTotal.toLocaleString("ja-JP") + "円";
+        document.getElementById("monthlyVisitTotal").textContent = visitsTotal.toLocaleString("ja-JP") + "回";
+    }
 
-    const amountInput = document.getElementById("amountInput");
+    function refreshAll() {
+        appendFromInputs();
+        renderCharts();
+        updateSummary();
+    }
+
     amountInput.addEventListener("input", function () {
-        const n = Number(String(amountInput.value).replace(/[^\d]/g, "")) || 0;
+        const n = parseNumberFromText(amountInput.value);
         amountInput.value = n ? n.toLocaleString("ja-JP") : "";
+        refreshAll();
     });
+    monthlyVisitsInput.addEventListener("input", refreshAll);
+    visitDateInput.addEventListener("change", function () {
+        if (visitDateInput.value) recordDateInput.value = visitDateInput.value;
+        refreshAll();
+    });
+    recordDateInput.addEventListener("change", refreshAll);
+    bottleInput.addEventListener("change", refreshAll);
 
-    setEditorValues();
-    bindEditors();
-    renderChart("sales");
-    renderChart("visitCount");
-    renderChart("visitDate");
-    renderChart("bottle");
+    renderCharts();
+    updateSummary();
 
     document.getElementById("confirmForm").addEventListener("submit", function () {
         amountInput.value = String(amountInput.value).replace(/[^\d]/g, "");
         document.getElementById("salesTrendData").value = JSON.stringify(state.sales);
         document.getElementById("visitCountTrendData").value = JSON.stringify(state.visitCount);
         document.getElementById("visitDateTrendData").value = JSON.stringify(state.visitDate);
-        document.getElementById("bottleTrendData").value = JSON.stringify(state.bottle);
+        document.getElementById("bottleTrendData").value = JSON.stringify({ month: state.bottle });
     });
 </script>
 </body>
