@@ -44,17 +44,36 @@ public class TodoController {
     }
 
     @PostMapping("/confirm")
-    public String confirm(@RequestParam("title") String title, Model model) {
-        model.addAttribute("title", title);
+    public String confirm(@RequestParam(value = "id", required = false) Long id,
+                          @RequestParam("name") String name,
+                          @RequestParam(value = "phone", required = false) String phone,
+                          @RequestParam(value = "birthday", required = false) String birthday,
+                          @RequestParam(value = "orderHistory", required = false) String orderHistory,
+                          @RequestParam(value = "amount", required = false) Integer amount,
+                          @RequestParam(value = "companionCount", required = false) Integer companionCount,
+                          @RequestParam(value = "companionMemo", required = false) String companionMemo,
+                          @RequestParam(value = "visitDate", required = false) String visitDate,
+                          @RequestParam(value = "notes", required = false) String notes,
+                          Model model) {
+        bindCustomerAttributes(model, id, name, phone, birthday, orderHistory, amount, companionCount, companionMemo, visitDate, notes);
         return "todo/confirm";
     }
 
     @PostMapping("/complete")
-    public String complete(@RequestParam("title") String title) {
-        Todo todo = new Todo();
-        todo.setTitle(title);
-        todo.setCompleted(false);
+    public String complete(@RequestParam(value = "id", required = false) Long id,
+                           @RequestParam("name") String name,
+                           @RequestParam(value = "phone", required = false) String phone,
+                           @RequestParam(value = "birthday", required = false) String birthday,
+                           @RequestParam(value = "orderHistory", required = false) String orderHistory,
+                           @RequestParam(value = "amount", required = false) Integer amount,
+                           @RequestParam(value = "companionCount", required = false) Integer companionCount,
+                           @RequestParam(value = "companionMemo", required = false) String companionMemo,
+                           @RequestParam(value = "visitDate", required = false) String visitDate,
+                           @RequestParam(value = "notes", required = false) String notes,
+                           RedirectAttributes redirectAttributes) {
+        Todo todo = buildCustomerTodo(id, name, phone, birthday, orderHistory, amount, companionCount, companionMemo, visitDate, notes);
         todoService.create(todo);
+        redirectAttributes.addFlashAttribute("successMessage", "顧客情報を登録しました");
         return "redirect:/todo";
     }
 
@@ -64,16 +83,16 @@ public class TodoController {
                          RedirectAttributes redirectAttributes) {
         Todo todo = todoService.findById(id);
         if (todo == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "\u66f4\u65b0\u306b\u5931\u6557\u3057\u307e\u3057\u305f");
+            redirectAttributes.addFlashAttribute("errorMessage", "更新に失敗しました");
             return "redirect:/todo";
         }
 
         todo.setTitle(title);
         boolean updated = todoService.update(todo);
         if (updated) {
-            redirectAttributes.addFlashAttribute("successMessage", "\u66f4\u65b0\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f");
+            redirectAttributes.addFlashAttribute("successMessage", "更新が完了しました");
         } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "\u66f4\u65b0\u306b\u5931\u6557\u3057\u307e\u3057\u305f");
+            redirectAttributes.addFlashAttribute("errorMessage", "更新に失敗しました");
         }
         return "redirect:/todo";
     }
@@ -88,10 +107,59 @@ public class TodoController {
     public String delete(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         boolean deleted = todoService.deleteById(id);
         if (deleted) {
-            redirectAttributes.addFlashAttribute("successMessage", "ToDo\u3092\u524a\u9664\u3057\u307e\u3057\u305f");
+            redirectAttributes.addFlashAttribute("successMessage", "ToDoを削除しました");
         } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "\u524a\u9664\u306b\u5931\u6557\u3057\u307e\u3057\u305f");
+            redirectAttributes.addFlashAttribute("errorMessage", "削除に失敗しました");
         }
         return "redirect:/todo";
+    }
+
+    private void bindCustomerAttributes(Model model,
+                                        Long id,
+                                        String name,
+                                        String phone,
+                                        String birthday,
+                                        String orderHistory,
+                                        Integer amount,
+                                        Integer companionCount,
+                                        String companionMemo,
+                                        String visitDate,
+                                        String notes) {
+        model.addAttribute("id", id);
+        model.addAttribute("name", name);
+        model.addAttribute("phone", phone);
+        model.addAttribute("birthday", birthday);
+        model.addAttribute("orderHistory", orderHistory);
+        model.addAttribute("amount", amount);
+        model.addAttribute("companionCount", companionCount);
+        model.addAttribute("companionMemo", companionMemo);
+        model.addAttribute("visitDate", visitDate);
+        model.addAttribute("notes", notes);
+    }
+
+    private Todo buildCustomerTodo(Long id,
+                                   String name,
+                                   String phone,
+                                   String birthday,
+                                   String orderHistory,
+                                   Integer amount,
+                                   Integer companionCount,
+                                   String companionMemo,
+                                   String visitDate,
+                                   String notes) {
+        Todo todo = new Todo();
+        todo.setId(id);
+        todo.setTitle(name);
+        todo.setName(name);
+        todo.setPhone(phone);
+        todo.setBirthday(birthday);
+        todo.setOrderHistory(orderHistory);
+        todo.setAmount(amount);
+        todo.setCompanionCount(companionCount);
+        todo.setCompanionMemo(companionMemo);
+        todo.setVisitDate(visitDate);
+        todo.setNotes(notes);
+        todo.setCompleted(false);
+        return todo;
     }
 }
